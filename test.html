@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>jPhotoTag - Photo Tag Plugin</title>
+
+    <link rel="stylesheet" type="text/css" href="css/imgareaselect-jphototag.css">
+    <link rel="stylesheet" type="text/css" href="css/jquery-phototag.css">
+
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.imgareaselect.js"></script>
+    <script type="text/javascript" src="js/jquery.phototag.js"></script>
+
+    <script type="text/javascript">
+
+        var mynotes = [
+            {
+                x1    : 10,
+                y1    : 10,
+                height: 150,
+                width : 50,
+                note  : "This is a note"
+            },
+            {
+                x1    : 25,
+                y1    : 25,
+                height: 70,
+                width : 80,
+                note  : "<b>This</b> is another note"
+            }
+        ];
+
+        $(window).load(function () {
+            //If your notes data is in the same scrip but is not named notes pass it
+            $('#image').jPhotoTag({notes: mynotes});
+
+            // example of how to use the showAll/hideAll functions
+            $('#shownotelink').toggle(
+                    function () {
+                        $('#image').jPhotoTag('showAll');
+                        return false;
+                    },
+                    function () {
+                        $('#image').jPhotoTag('hideAll');
+                        return false;
+                    }
+            );
+
+            // Cancel note
+            $('#cancelnote').click(function () {
+                $('#image').jPhotoTag('cancel');
+                return false;
+            });
+
+            // Add note
+            $('#addnotelink').click(function () {
+                $('#image').jPhotoTag('add');
+                return false;
+            });
+        });
+    </script>
+</head>
+<body>
+<div style="text-align: center;">
+    <img style="margin: auto;" id="image" src="test.jpg" alt="A clear blue sky for me to fly"/>
+</div>
+
+<a href="#" id="shownotelink">Show/Hide notes</a>
+
+<a href="#" id="addnotelink">Add a note</a>
+
+</body>
+</html>
