@@ -1,6 +1,6 @@
 /**
  * Photo Tag jQuery plugin
- * Version: 0.1
+ * Version: UNSTABLE
  *
  * Copyright (c) 2012 - M.Ozan Hazer (ozanhazer@gmail.com)
  *
@@ -13,10 +13,11 @@
      * @type {Object}
      */
     var defaults = {
-        editAction: 'doubleClick', // Possible values: doubleClick, rightClick, null|false
-        notes     : [],
-        debug     : false,
-        form      : '<div id="jphototag-note-form">\
+        editAction      : 'doubleClick', // Possible values: doubleClick, rightClick, null|false
+        notes           : [],
+        debug           : false,
+        showNotesOnHover: true,
+        form            : '<div id="jphototag-note-form">\
             <form method="post" action="">\
                 <legend>Add Note</legend>\
                 <input name="data[note][x1]" type="hidden" value="" id="jphototag-note-x1"/>\
@@ -122,18 +123,21 @@
 
             // Setup show on hover.
             // TODO: This does not support multiple instances
-            // TODO: Make it parametric.
-            $(_targetImages).hover(
-                function () {
-                    $('.jphototag-note').show();
-//                    $(this).find('.jphototag-note').show();
-                },
-                function () {
-                    $('.jphototag-note,.jphototag-note-text').hide();
-//                    $(this).find('.jphototag-note,.jphototag-note-text').hide();
-                }
-            );
+            if (defaults.showNotesOnHover) {
+                $(_targetImages).hover(
+                    function () {
+                        $('.jphototag-note').show();
+                        // $(this).find('.jphototag-note').show();
+                    },
+                    function () {
+                        $('.jphototag-note,.jphototag-note-text').hide();
+                        // $(this).find('.jphototag-note,.jphototag-note-text').hide();
+                    }
+                );
+            }
 
+            // Add the form
+            // TODO: Should be appended one time only
             $('body').append(defaults.form);
 
             // Add the default notes
@@ -148,7 +152,7 @@
         add: function () {
             // If already adding a note, don't let another instance
             if (_addingNote) {
-                return false;
+                return;
             }
 
             _addingNote = true;

@@ -33,7 +33,9 @@
 
         $(window).load(function () {
             //If your notes data is in the same scrip but is not named notes pass it
-            $('#image').jPhotoTag({notes: mynotes});
+            $('#image').jPhotoTag({
+                notes: mynotes
+            });
 
             // example of how to use the showAll/hideAll functions
             $('#shownotelink').toggle(
