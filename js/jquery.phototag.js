@@ -13,7 +13,7 @@
      * @type {Object}
      */
     var defaults = {
-        editAction      : 'doubleClick', // Possible values: doubleClick, rightClick, null|false
+        editAction      : 'dblclick', // Possible values: dblclick, rightclick, null|false
         notes           : [],
         debug           : false,
         showNotesOnHover: true,
@@ -78,6 +78,8 @@
                     top      : noteFormPosition.top + 'px',
                     'z-index': 10000
                 }).show().find(':input:visible:first').focus();
+
+                methods.hideAll();
 
             },
             onSelectChange: function (img, area) {
@@ -181,8 +183,8 @@
             var position = {
                 x1: x1,
                 y1: y1,
-                x2: x1 + $(this).width(),
-                y2: y1 + $(this).height()
+                x2: x1 + $(note).width(),
+                y2: y1 + $(note).height()
             };
 
 
@@ -293,6 +295,12 @@
                     $(this).next('.jphototag-note-text').hide();
                     $(this).next('.jphototag-note-text').css("z-index", 0);
                 });
+
+            if(defaults.editAction) {
+                note_area_div.bind(defaults.editAction, function() {
+                    methods.edit(this);
+                });
+            }
 
             var $body = $('body');
             $body.append(note_area_div);
