@@ -46,11 +46,27 @@
      */
     var _addingNote = false;
 
+    /**
+     * Target image
+     *
+     * @type {jQuery}
+     * @private
+     */
     var _targetImages;
 
+    /**
+     * Keeps the list of the notes
+     *
+     * @type {Object}
+     * @private
+     */
     var _notes = {};
 
-    // Get position for note form.
+    /**
+     * Get position for note form.
+     *
+     * @private
+     */
     var _getNoteFormPosition = function (img, area) {
         var position = {};
 
@@ -61,6 +77,12 @@
         return position;
     };
 
+    /**
+     * Creates an imgAreaSelect instance for adding and editing.
+     *
+     * @param position
+     * @private
+     */
     var _createImgAreaSelect = function (position) {
 
         if (!position) {
