@@ -74,8 +74,8 @@
 
         // Do the job!
         $(_targetImages).imgAreaSelect({
-            enable        : true,
-            onInit        : function (img, area) {
+            'enable'        : true,
+            'onInit'        : function (img, area) {
                 var noteFormPosition = _getNoteFormPosition(img, area);
 
                 $('#jphototag-note-form').css({
@@ -87,7 +87,7 @@
                 methods.hideAll();
 
             },
-            onSelectChange: function (img, area) {
+            'onSelectChange': function (img, area) {
                 var noteFormPosition = _getNoteFormPosition(img, area);
 
                 $('#jphototag-note-form').css({
@@ -108,7 +108,7 @@
             y2            : position.y2
         });
 
-    }
+    };
 
 
     /**
@@ -165,7 +165,7 @@
                         y1: y1,
                         x2: x1 + defaults.defaultSize,
                         y2: y1 + defaults.defaultSize
-                    }
+                    };
                     methods.add(position);
                 });
             }
@@ -293,7 +293,7 @@
             var note_top = parseInt(imgOffset.top) + parseInt(note_data.y1);
             var note_p_top = note_top + parseInt(note_data.height) + 5;
 
-            var note_area_div = $('<div class="jphototag-note"></div>')
+            var note_area_div = $('<div class="jphototag-note"><div class="jphototag-note-border"><div class="jphototag-note-bg"></div></div></div>')
                 .css({ left: note_left + 'px',
                     top    : note_top + 'px',
                     width  : note_data.width + 'px',
@@ -307,11 +307,13 @@
             note_area_div.hover(
                 function () {
                     $('.jphototag-note').show();
-                    $(this).next('.jphototag-note-text').show();
+                    $(this).addClass('jphototag-note-focus');
+                    $(this).next('.jphototag-note-text').show().css('display', 'inline-block');
                     $(this).next('.jphototag-note-text').css("z-index", 10000);
                 },
                 function () {
                     $('.jphototag-note').show();
+                    $(this).removeClass('jphototag-note-focus');
                     $(this).next('.jphototag-note-text').hide();
                     $(this).next('.jphototag-note-text').css("z-index", 0);
                 });
@@ -328,6 +330,7 @@
         }
     };
 
+    //noinspection FunctionWithInconsistentReturnsJS
     $.fn.jPhotoTag = function (method) {
         // Method calling logic
         if (methods[method]) {
