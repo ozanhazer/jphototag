@@ -17,6 +17,9 @@
         notes           : [],
         debug           : false,
         showNotesOnHover: true,
+        addNoteAction   : 'click',
+        defaultSize     : 60, // Default note size when adding
+        defaultPosition : [120, 90], // Default note position when adding.
         form            : '<div id="jphototag-note-form">\
             <form method="post" action="">\
                 <legend>Add Note</legend>\
@@ -59,11 +62,13 @@
     var _createImgAreaSelect = function (position) {
 
         if (!position) {
+            var x1 = defaults.defaultPosition[0];
+            var y1 = defaults.defaultPosition[1];
             position = {
-                x1: 120,
-                y1: 90,
-                x2: 280,
-                y2: 210
+                x1: x1,
+                y1: y1,
+                x2: x1 + defaults.defaultSize,
+                y2: y1 + defaults.defaultSize
             }
         }
 
@@ -146,12 +151,30 @@
             if (defaults.notes.length > 0) {
                 methods.notes(defaults.notes);
             }
+
+            // Add note action
+            if(defaults.addNoteAction) {
+                $(_targetImages).bind(defaults.addNoteAction, function(e) {
+                    var posX = $(this).offset().left;
+                    var posY = $(this).offset().top;
+
+                    var x1 = e.pageX - posX - defaults.defaultSize / 2;
+                    var y1 = e.pageY - posY - defaults.defaultSize / 2;
+                    var position = {
+                        x1: x1,
+                        y1: y1,
+                        x2: x1 + defaults.defaultSize,
+                        y2: y1 + defaults.defaultSize
+                    }
+                    methods.add(position);
+                });
+            }
         },
 
         /**
          * Add new note
          */
-        add: function () {
+        add: function (position) {
             // If already adding a note, don't let another instance
             if (_addingNote) {
                 return;
@@ -159,7 +182,7 @@
 
             _addingNote = true;
 
-            _createImgAreaSelect();
+            _createImgAreaSelect(position);
         },
 
         /**
@@ -196,7 +219,7 @@
         /**
          * Delete note
          */
-        delete: function (note) {
+        'delete': function (note) {
 
         },
 
@@ -257,9 +280,6 @@
 
         /**
          * Add single note to the image.
-         *
-         * TODO: Define the image that we are working on and use that instead of
-         * imgOffset etc.
          *
          * note_data example:
          * {x1: 10, y1: 10, height: 150, width: 50, note: "This is a note"}
