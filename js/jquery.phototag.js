@@ -135,11 +135,15 @@
             if (defaults.showNotesOnHover) {
                 $(_targetImages).hover(
                     function () {
-                        $('.jphototag-note').show();
+                        if(!_addingNote) {
+                            $('.jphototag-note').show();
+                        }
                         // $(this).find('.jphototag-note').show();
                     },
                     function () {
-                        $('.jphototag-note,.jphototag-note-text').hide();
+                        if(!_addingNote) {
+                            $('.jphototag-note,.jphototag-note-text').hide();
+                        }
                         // $(this).find('.jphototag-note,.jphototag-note-text').hide();
                     }
                 );
@@ -326,13 +330,17 @@
             // Add note actions
             note_area_div.hover(
                 function () {
-                    $('.jphototag-note').show();
+                    if(!_addingNote) {
+                        $('.jphototag-note').show();
+                    }
                     $(this).addClass('jphototag-note-focus');
                     $(this).next('.jphototag-note-text').show().css('display', 'inline-block');
                     $(this).next('.jphototag-note-text').css("z-index", 10000);
                 },
                 function () {
-                    $('.jphototag-note').show();
+                    if(!_addingNote) {
+                        $('.jphototag-note').show();
+                    }
                     $(this).removeClass('jphototag-note-focus');
                     $(this).next('.jphototag-note-text').hide();
                     $(this).next('.jphototag-note-text').css("z-index", 0);
