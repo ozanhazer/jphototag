@@ -219,8 +219,10 @@
         /**
          * Delete note
          */
-        'delete': function (note) {
-
+        'delete': function (id) {
+            var $note = $('#jphototag-note-' + id);
+            $note.next().remove();
+            $note.remove();
         },
 
         /**
@@ -293,7 +295,9 @@
             var note_top = parseInt(imgOffset.top) + parseInt(note_data.y1);
             var note_p_top = note_top + parseInt(note_data.height) + 5;
 
-            var note_area_div = $('<div class="jphototag-note"><div class="jphototag-note-border"><div class="jphototag-note-bg"></div></div></div>')
+            var id = note_data.id ? note_data.id : $('.jphototag-note').length + 1;
+
+            var note_area_div = $('<div class="jphototag-note" id="jphototag-note-' + id + '"><div class="jphototag-note-border"><div class="jphototag-note-bg"></div></div></div>')
                 .css({ left: note_left + 'px',
                     top    : note_top + 'px',
                     width  : note_data.width + 'px',

@@ -60,6 +60,12 @@
                 $('#image').jPhotoTag('add');
                 return false;
             });
+
+            // Remove note
+            $('#removenotelink').click(function () {
+                $('#image').jPhotoTag('delete', 1);
+                return false;
+            });
         });
     </script>
 </head>
@@ -71,6 +77,8 @@
 <a href="#" id="shownotelink">Show/Hide notes</a>
 
 <a href="#" id="addnotelink">Add a note</a>
+
+<a href="#" id="removenotelink">Remove a note</a>
 
 </body>
 </html>
