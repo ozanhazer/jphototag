@@ -77,6 +77,8 @@
         // Do the job!
         $(_targetImages).imgAreaSelect({
             'enable'        : true,
+            'handles'       : true,
+            'persistent'    : true,
             'onInit'        : function (img, area) {
                 var noteFormPosition = _getNoteFormPosition(img, area);
 
@@ -161,18 +163,34 @@
             // Add note action
             if(defaults.addNoteAction) {
                 $(_targetImages).bind(defaults.addNoteAction, function(e) {
-                    var posX = $(this).offset().left;
-                    var posY = $(this).offset().top;
+                    var $img = $(this);
+                    var imgPosition = $img.offset();
 
-                    var x1 = e.pageX - posX - defaults.defaultSize / 2;
-                    var y1 = e.pageY - posY - defaults.defaultSize / 2;
-                    var position = {
-                        x1: x1,
-                        y1: y1,
-                        x2: x1 + defaults.defaultSize,
-                        y2: y1 + defaults.defaultSize
-                    };
-                    methods.add(position);
+                    // Get the left and top coordinates
+                    var x1 = e.pageX - imgPosition.left - defaults.defaultSize / 2;
+                    var y1 = e.pageY - imgPosition.top - defaults.defaultSize / 2;
+
+                    // Correction for left & top. Avoid selection form moving outside the image
+                    if(x1 < 0) x1 = 0;
+                    if(y1 < 0) y1 = 0;
+
+                    // Right and bottom coordinates
+                    var x2 = x1 + defaults.defaultSize;
+                    var y2 = y1 + defaults.defaultSize;
+
+                    // Correction for right & bottom
+                    if(x2 > $img.width()) {
+                        x1 = x1 - (x2 - $img.width());
+                        x2 = x1 + defaults.defaultSize;
+                    }
+
+                    if(y2 > $img.height()) {
+                        y1 = y1 - (y2 - $img.height());
+                        y2 = y1 + defaults.defaultSize;
+                    }
+
+                    // Add the tag form
+                    methods.add({ x1: x1, y1: y1, x2: x2, y2: y2 });
                 });
             }
         },
