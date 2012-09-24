@@ -48,6 +48,8 @@
 
     var _targetImages;
 
+    var _notes = {};
+
     // Get position for note form.
     var _getNoteFormPosition = function (img, area) {
         var position = {};
@@ -149,7 +151,7 @@
 
             // Add the default notes
             if (defaults.notes.length > 0) {
-                methods.notes(defaults.notes);
+                methods.addNotes(defaults.notes);
             }
 
             // Add note action
@@ -223,6 +225,8 @@
             var $note = $('#jphototag-note-' + id);
             $note.next().remove();
             $note.remove();
+
+            delete _notes[id];
         },
 
         /**
@@ -256,6 +260,18 @@
             $('.jphototag-note,.jphototag-note-text').show();
         },
 
+        show: function(id) {
+            var $note = $('#jphototag-note-' + id);
+            $note.show();
+            $note.next().show();
+        },
+
+        hide: function(id) {
+            var $note = $('#jphototag-note-' + id);
+            $note.hide();
+            $note.next().hide();
+        },
+
         /**
          * Default notes.
          *
@@ -274,9 +290,9 @@
          *
          * @param notes
          */
-        notes: function (notes) {
+        addNotes: function (notes) {
             $(notes).each(function () {
-                methods.note(this);
+                methods.addNote(this);
             });
         },
 
@@ -288,7 +304,7 @@
          *
          * @param note_data
          */
-        note: function (note_data) {
+        addNote: function (note_data) {
             var imgOffset = _targetImages.offset();
 
             var note_left = parseInt(imgOffset.left) + parseInt(note_data.x1);
@@ -331,6 +347,12 @@
             var $body = $('body');
             $body.append(note_area_div);
             $body.append(note_text_div);
+
+            _notes[id] = note_data;
+        },
+
+        allNotes: function() {
+            return _notes;
         }
     };
 
