@@ -496,6 +496,12 @@
             $body.append(note_text_div);
 
             _notes[note_data.id] = note_data;
+
+            note_area_div.find('.jphototag-note-border').each(function() {
+                var $this = $(this);
+                var height = note_data.height - parseInt($this.css('borderTopWidth')) - parseInt($this.css('borderBottomWidth'));
+                $this.css('height', height + 'px')
+            });
         },
 
         allNotes: function () {
