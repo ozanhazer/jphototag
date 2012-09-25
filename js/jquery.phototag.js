@@ -1,6 +1,6 @@
 /**
  * Photo Tag jQuery plugin
- * Version: UNSTABLE
+ * Version: 0.9a
  *
  * Copyright (c) 2012 - M.Ozan Hazer (ozanhazer@gmail.com)
  *
@@ -246,6 +246,28 @@
         return partOne + '-' + partTwo + '-' + partThree;
     };
 
+    var _updateNotePosition = function (note) {
+        var note_data = note.data('jphototag.note');
+
+        var imgOffset = _targetImages.offset();
+
+        var note_left = parseInt(imgOffset.left) + parseInt(note_data.x1);
+        var note_top = parseInt(imgOffset.top) + parseInt(note_data.y1);
+        var note_p_top = note_top + parseInt(note_data.height) + 5;
+
+        note.css({
+            left: note_left + 'px',
+            top    : note_top + 'px',
+            width  : note_data.width + 'px',
+            height : note_data.height + 'px'
+        });
+
+        note.next('.jphototag-note-text').css({
+            left: note_left + 'px',
+            top    : note_p_top + 'px'
+        });
+    };
+
     /**
      * Plugin definition
      *
@@ -287,6 +309,14 @@
             if (defaults.notes.length > 0) {
                 methods.addNotes(defaults.notes);
             }
+
+            // Fix the positions of the notes if the window is resized
+            $(window).bind('resize.jphototag', function() {
+                var notes = $(_targetImages).jPhotoTag('allNotes'), key;
+                for(key in notes) {
+                    _updateNotePosition($('#jphototag-note-' + notes[key].id));
+                }
+            });
 
             // Add note action
             if (defaults.addNoteAction) {
@@ -456,24 +486,13 @@
          * @param note_data
          */
         addNote: function (note_data) {
-            var imgOffset = _targetImages.offset();
-
-            var note_left = parseInt(imgOffset.left) + parseInt(note_data.x1);
-            var note_top = parseInt(imgOffset.top) + parseInt(note_data.y1);
-            var note_p_top = note_top + parseInt(note_data.height) + 5;
 
             if(!note_data.id) note_data.id = _uniqid();
 
             var note_area_div = $('<div class="jphototag-note" id="jphototag-note-' + note_data.id + '"><div class="jphototag-note-border"><div class="jphototag-note-bg"></div></div></div>')
-                .css({ left: note_left + 'px',
-                    top    : note_top + 'px',
-                    width  : note_data.width + 'px',
-                    height : note_data.height + 'px' })
                 .data('jphototag.note', note_data);
 
-            var note_text_div = $('<div class="jphototag-note-text">' + note_data.note + '</div>')
-                .css({ left: note_left + 'px',
-                    top    : note_p_top + 'px'});
+            var note_text_div = $('<div class="jphototag-note-text">' + note_data.note + '</div>');
 
             // Add note actions
             note_area_div.hover(
@@ -500,12 +519,16 @@
                 });
             }
 
+            _updateNotePosition(note_area_div);
+
             var $body = $('body');
             $body.append(note_area_div);
             $body.append(note_text_div);
 
             _notes[note_data.id] = note_data;
 
+            // Should be applied after the elements are added to the DOM or
+            // CSS properties cannot be read.
             note_area_div.find('.jphototag-note-border').each(function() {
                 var $this = $(this);
                 var height = note_data.height - parseInt($this.css('borderTopWidth')) - parseInt($this.css('borderBottomWidth'));
