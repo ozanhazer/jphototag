@@ -20,17 +20,22 @@
         addNoteAction   : 'click',
         defaultSize     : 60, // Default note size when adding
         defaultPosition : [120, 90], // Default note position when adding.
+        messages        : {
+            'add_note'   : 'Add Note',
+            'submit_note': 'Save',
+            'cancel_note': 'Cancel'
+        },
         form            : '<div id="jphototag-note-form">\
             <form method="post" action="">\
-                <legend>Add Note</legend>\
+                <legend>%add_note%</legend>\
                 <input name="data[note][x1]" type="hidden" value="" id="jphototag-note-x1"/>\
                 <input name="data[note][y1]" type="hidden" value="" id="jphototag-note-y1"/>\
                 <input name="data[note][height]" type="hidden" value="" id="jphototag-note-height"/>\
                 <input name="data[note][width]" type="hidden" value="" id="jphototag-note-width"/>\
                 <textarea name="data[note][tag]" id="jphototag-note-tag"></textarea>\
                 <div class="submit">\
-                    <input type="submit" value="Submit"/>\
-                    <input type="button" value="Cancel" id="cancelnote"/>\
+                    <input type="submit" value="%submit_note%"/>\
+                    <input type="button" value="%cancel_note%" id="cancelnote"/>\
                 </div>\
             </form>\
         </div>\
@@ -136,6 +141,18 @@
 
     };
 
+    /**
+     * Basic translation function
+     *
+     * @param text
+     * @return {String}
+     * @private
+     */
+    var _translate = function (text) {
+        return String(text).replace(/%(.+?)%/g, function (match, index) {
+            return defaults.messages[index];
+        });
+    };
 
     /**
      * Plugin definition
@@ -175,7 +192,7 @@
 
             // Add the form
             // TODO: Should be appended one time only
-            $('body').append(defaults.form);
+            $('body').append(_translate(defaults.form));
 
             // Add the default notes
             if (defaults.notes.length > 0) {
