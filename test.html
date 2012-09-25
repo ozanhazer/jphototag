@@ -118,6 +118,20 @@
                 }
                 return false;
             });
+
+            // Destroy
+            $('#destroylink').click(function() {
+                $('#image').jPhotoTag('destroy');
+            });
+
+            // Enable / Disable
+            $('#disablelink').click(function() {
+                if($('#image').jPhotoTag('isEnabled')) {
+                    $('#image').jPhotoTag('disable');
+                } else {
+                    $('#image').jPhotoTag('enable');
+                }
+            });
         });
     </script>
 </head>
@@ -133,6 +147,10 @@
 <a href="#" id="removenotelink">Remove a note</a>
 <span>|</span>
 <a href="#" id="listnoteslink">List notes</a>
+<span>|</span>
+<a href="#" id="destroylink">Destroy</a>
+<span>|</span>
+<a href="#" id="disablelink">Enable / Disable</a>
 
 <ul id="all_notes">
 

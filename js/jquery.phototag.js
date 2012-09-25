@@ -101,6 +101,8 @@
         '
     };
 
+    var _instance, _enabled = true;
+
     /**
      * If true add note form (imgAreaSelect) is active.
      * Only one add note form in an image can be active at the same time
@@ -265,12 +267,12 @@
             if (defaults.showNotesOnHover) {
                 $(_targetImages).hover(
                     function () {
-                        if (!_addingNote) {
+                        if (!_addingNote && _enabled) {
                             $('.jphototag-note').show();
                         }
                     },
                     function () {
-                        if (!_addingNote) {
+                        if (!_addingNote && _enabled) {
                             $('.jphototag-note,.jphototag-note-text').hide();
                             $('.jphototag-note').removeClass('jphototag-note-focus');
                         }
@@ -288,7 +290,12 @@
 
             // Add note action
             if (defaults.addNoteAction) {
-                $(_targetImages).bind(defaults.addNoteAction, function (e) {
+                $(_targetImages).bind(defaults.addNoteAction + '.jphototag', function (e) {
+
+                    if(!_enabled) {
+                        return;
+                    }
+
                     var $img = $(this);
                     var imgPosition = $img.offset();
 
@@ -319,6 +326,8 @@
                     methods.add({ x1: x1, y1: y1, x2: x2, y2: y2 });
                 });
             }
+
+            _instance = this;
         },
 
         /**
@@ -504,8 +513,28 @@
             });
         },
 
-        allNotes: function () {
+        'allNotes': function () {
             return _notes;
+        },
+
+        'isEnabled': function() {
+            return _enabled;
+        },
+
+        'enable': function() {
+            _enabled = true;
+        },
+
+        'disable': function() {
+            _enabled = false;
+            _removeImgAreaSelect();
+            methods.hideAll();
+        },
+
+        'destroy': function() {
+            $('#jphototag-note-form,.jphototag-note,.jphototag-note-text').remove();
+            $(_targetImages).unbind('.jphototag');
+            _instance = null;
         }
     };
 
@@ -513,7 +542,13 @@
     $.fn.jPhotoTag = function (method) {
         // Method calling logic
         if (methods[method]) {
-            return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
+            if(_instance) {
+                if(_enabled || method == 'enable') {
+                    return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
+                }
+            } else {
+                $.error('jPhotoTag is not initialized');
+            }
         } else if (typeof method === 'object' || !method) {
             return methods.init.apply(this, arguments);
         } else {
