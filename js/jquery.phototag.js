@@ -150,7 +150,7 @@
             .find('.jphototag-note-form-submit').unbind('click')
             .end()
             .find('.jphototag-note-form-cancel').unbind('click');
-    }
+    };
 
     /**
      * Creates an imgAreaSelect instance for adding and editing.
@@ -235,6 +235,13 @@
         return String(text).replace(/%(.+?)%/g, function (match, index) {
             return defaults.messages[index];
         });
+    };
+
+    var _uniqid = function () {
+        var partOne = new Date().getTime();
+        var partTwo = 1 + Math.floor((Math.random() * 32767));
+        var partThree = 1 + Math.floor((Math.random() * 32767));
+        return partOne + '-' + partTwo + '-' + partThree;
     };
 
     /**
@@ -446,7 +453,7 @@
             var note_top = parseInt(imgOffset.top) + parseInt(note_data.y1);
             var note_p_top = note_top + parseInt(note_data.height) + 5;
 
-            if(!note_data.id) note_data.id = $('.jphototag-note').length + 1;
+            if(!note_data.id) note_data.id = _uniqid();
 
             var note_area_div = $('<div class="jphototag-note" id="jphototag-note-' + note_data.id + '"><div class="jphototag-note-border"><div class="jphototag-note-bg"></div></div></div>')
                 .css({ left: note_left + 'px',
