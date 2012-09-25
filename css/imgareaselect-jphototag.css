@@ -20,8 +20,8 @@
 
 .imgareaselect-border1, .imgareaselect-border2,
 .imgareaselect-border3, .imgareaselect-border4 {
-    /*filter: alpha(opacity=50);*/
-	/*opacity: 0.5;*/
+    filter: alpha(opacity=30);
+	opacity: 0.3;
 }
 
 .imgareaselect-handle {
@@ -36,5 +36,7 @@
 }
 
 .imgareaselect-selection {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: #fff;
+    filter: alpha(opacity=20);
+    opacity: 0.2;
 }
