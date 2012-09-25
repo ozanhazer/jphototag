@@ -172,7 +172,6 @@
             _targetImages = $(this);
 
             // Setup show on hover.
-            // TODO: This does not support multiple instances
             if (defaults.showNotesOnHover) {
                 $(_targetImages).hover(
                     function () {
@@ -184,6 +183,7 @@
                     function () {
                         if(!_addingNote) {
                             $('.jphototag-note,.jphototag-note-text').hide();
+                            $('.jphototag-note').removeClass('jphototag-note-focus');
                         }
                         // $(this).find('.jphototag-note,.jphototag-note-text').hide();
                     }
@@ -191,7 +191,6 @@
             }
 
             // Add the form
-            // TODO: Should be appended one time only
             $('body').append(_translate(defaults.form));
 
             // Add the default notes
@@ -292,7 +291,6 @@
 
         /**
          * Cancel add/edit note form.
-         * TODO: Get rid of CSS id names
          */
         cancel: function () {
             $(_targetImages).imgAreaSelect({
@@ -305,31 +303,29 @@
 
         /**
          * Hide all notes
-         *
-         * TODO: hide the notes of the specific jPhotoTag
          */
         hideAll: function () {
             $('.jphototag-note,.jphototag-note-text').hide();
+            $('.jphototag-note').removeClass('jphototag-note-focus');
         },
 
         /**
          * Show all notes
-         *
-         * TODO: hide the notes of the specific jPhotoTag
          */
         showAll: function () {
             $('.jphototag-note,.jphototag-note-text').show();
+            $('.jphototag-note').addClass('jphototag-note-focus');
         },
 
         show: function(id) {
             var $note = $('#jphototag-note-' + id);
-            $note.show();
+            $note.show().addClass('jphototag-note-focus');
             $note.next().show();
         },
 
         hide: function(id) {
             var $note = $('#jphototag-note-' + id);
-            $note.hide();
+            $note.hide().removeClass('jphototag-note-focus');
             $note.next().hide();
         },
 
