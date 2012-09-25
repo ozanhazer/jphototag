@@ -16,6 +16,7 @@
 
         var mynotes = [
             {
+                id    : 123,
                 x1    : 10,
                 y1    : 10,
                 height: 150,
@@ -35,6 +36,25 @@
             //If your notes data is in the same scrip but is not named notes pass it
             $('#image').jPhotoTag({
                 notes: mynotes
+//                onBeforeRemove: function(note) {
+//                    // Make an Ajax call and confirm if the tag is removed
+//                    // console.log(note.data('jphototag.note').id);
+//                    return confirm('Are you sure?');
+//                },
+//                onAddNoteOpen   : function (form) {
+//                    form.find('.jphototag-note-tag').val('Some default value').select();
+//                },
+//                onEditNoteOpen  : function (form, note) {
+//                    console.log(note.data('jphototag.note').id);
+//                    form.find('.jphototag-note-tag').val('Editing...').select();
+//                },
+//                onSubmit        : function (form, note) {
+//                    console.log('onSubmit', this, form, note);
+//                },
+//                onCancel        : function (form, note) {
+//                    $(this).jPhotoTag('cancel');
+//                    console.log('onCancel', this, form, note);
+//                }
             });
 
             // example of how to use the showAll/hideAll functions
@@ -50,10 +70,10 @@
             );
 
             // Cancel note
-            $('#cancelnote').click(function () {
-                $('#image').jPhotoTag('cancel');
-                return false;
-            });
+//            $('#cancelnote').click(function () {
+//                $('#image').jPhotoTag('cancel');
+//                return false;
+//            });
 
             // Add note
             $('#addnotelink').click(function () {
@@ -63,14 +83,17 @@
 
             // Remove note
             $('#removenotelink').click(function () {
-                $('#image').jPhotoTag('delete', 2);
+                $('#image').jPhotoTag('remove', 2);
                 return false;
             });
 
             // Remove from notes list
             $('.remove_note').live('click', function() {
-                $('#image').jPhotoTag('delete', $(this).data('id'));
-                $(this).closest('li').remove();
+                var removed = $('#image').jPhotoTag('remove', $(this).data('id'));
+
+                if(removed) {
+                    $(this).closest('li').remove();
+                }
 
                 return false;
             });
