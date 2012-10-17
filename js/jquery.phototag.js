@@ -569,7 +569,7 @@
                 if(_enabled || method == 'enable') {
                     return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
                 }
-            } else {
+            } else if(method != 'destroy') {
                 $.error('jPhotoTag is not initialized');
             }
         } else if (typeof method === 'object' || !method) {
