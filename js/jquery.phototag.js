@@ -57,6 +57,7 @@
          *   form.find('.jphototag-note-tag').val(myAjaxValue)
          *
          * @param form
+         * @param note
          */
         onEditNoteOpen  : function (form, note) {
             var data = note.data('jphototag.note');
@@ -314,7 +315,9 @@
             $(window).bind('resize.jphototag', function() {
                 var notes = $(_targetImages).jPhotoTag('allNotes'), key;
                 for(key in notes) {
-                    _updateNotePosition($('#jphototag-note-' + notes[key].id));
+                    if(notes.hasOwnProperty(key)) {
+                        _updateNotePosition($('#jphototag-note-' + notes[key].id));
+                    }
                 }
             });
 
@@ -519,11 +522,11 @@
                 });
             }
 
-            _updateNotePosition(note_area_div);
-
             var $body = $('body');
             $body.append(note_area_div);
             $body.append(note_text_div);
+
+            _updateNotePosition(note_area_div);
 
             _notes[note_data.id] = note_data;
 
@@ -569,7 +572,7 @@
                 if(_enabled || method == 'enable') {
                     return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
                 }
-            } else {
+            } else if(method != 'destroy') {
                 $.error('jPhotoTag is not initialized');
             }
         } else if (typeof method === 'object' || !method) {
