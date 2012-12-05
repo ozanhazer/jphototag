@@ -203,6 +203,10 @@
                         defaults.onCancel.apply(img, params);
                     });
 
+                $('#jphototag-note-x1').val(area.x1);
+                $('#jphototag-note-y1').val(area.y1);
+                $('#jphototag-note-height').val(area.height);
+                $('#jphototag-note-width').val(area.width);
             },
             'onSelectChange': function (img, area) {
                 var noteFormPosition = _getNoteFormPosition(img, area);
