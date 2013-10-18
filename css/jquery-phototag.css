@@ -47,3 +47,11 @@
 #jphototag-note-form textarea{
 	width: 100%;
 }
+
+#jphototag-note-form legend {
+    font-size: 12px;
+    line-height: 12px;
+    border: 0 none;
+    margin: 0;
+    color: #000;
+}

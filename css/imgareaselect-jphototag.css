@@ -3,7 +3,7 @@
  */
 
 .imgareaselect-border1 {
-	background: url(border-v.gif) repeat-y left top;
+    background: url(border-v.gif) repeat-y left top;
 }
 
 .imgareaselect-border2 {
@@ -20,8 +20,8 @@
 
 .imgareaselect-border1, .imgareaselect-border2,
 .imgareaselect-border3, .imgareaselect-border4 {
-    filter: alpha(opacity=30);
-	opacity: 0.3;
+    filter: alpha(opacity=50);
+    opacity: 0.5;
 }
 
 .imgareaselect-handle {
@@ -32,11 +32,10 @@
 }
 
 .imgareaselect-outer {
-    background-color: transparent;
+    border-color: #000;
+    filter: alpha(opacity=50);
+    opacity: 0.5;
 }
 
 .imgareaselect-selection {
-    background-color: #fff;
-    filter: alpha(opacity=20);
-    opacity: 0.2;
 }

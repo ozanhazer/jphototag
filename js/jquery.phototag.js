@@ -1,6 +1,6 @@
 /**
  * Photo Tag jQuery plugin
- * Version: 0.9a
+ * Version: 0.9b
  *
  * Copyright (c) 2012 - M.Ozan Hazer (ozanhazer@gmail.com)
  *
@@ -18,6 +18,7 @@
         debug           : false,
         showNotesOnHover: true,
         addNoteAction   : 'click',
+        noteFormZIndex  : 10000,
         /**
          * Triggered after the form is submitted
          *
@@ -32,7 +33,7 @@
          * @param form
          * @param note
          */
-        onCancel        : function (form, note) {
+        onCancel     : function (form, note) {
             methods.cancel();
             $('#jphototag-note-id').val('');
             form.find('.jphototag-note-tag').val('');
@@ -46,7 +47,7 @@
          *
          * @param form
          */
-        onAddNoteOpen   : function (form) {
+        onAddNoteOpen: function (form) {
         },
 
         /**
@@ -59,7 +60,7 @@
          * @param form
          * @param note
          */
-        onEditNoteOpen  : function (form, note) {
+        onEditNoteOpen: function (form, note) {
             var data = note.data('jphototag.note');
             $('#jphototag-note-id').val(data.id);
             form.find('.jphototag-note-tag').val(data.note);
@@ -75,16 +76,19 @@
          *
          * @param note
          */
-        onBeforeRemove  : function(note) {
+        onBeforeRemove: function (note) {
         },
-        defaultSize     : 60, // Default note size when adding
-        defaultPosition : [120, 90], // Default note position when adding.
-        messages        : {
+
+        onInit         : function () {
+        },
+        defaultSize    : 60, // Default note size when adding
+        defaultPosition: [120, 90], // Default note position when adding.
+        messages       : {
             'add_note'   : 'Add Note',
             'submit_note': 'Save',
             'cancel_note': 'Cancel'
         },
-        form            : '<div id="jphototag-note-form">\
+        form           : '<div id="jphototag-note-form">\
             <form method="post" action="">\
                 <legend>%add_note%</legend>\
                 <input name="data[note][id]" type="hidden" value="" id="jphototag-note-id"/>\
@@ -130,21 +134,29 @@
     var _notes = {};
 
     /**
-     * Get position for note form.
+     * The proportion of the displayed image according to the original image
+     *
+     * @type {Object}
+     * @private
+     */
+    var _imageScaleFactor;
+
+    /**
+     * @private
+     */
+    var _imageRealWidth;
+
+    /**
+     * @private
+     */
+    var _imageRealHeight;
+
+    /**
+     * Remove ImgAreaSelect object
      *
      * @private
      */
-    var _getNoteFormPosition = function (img, area) {
-        var position = {};
-
-        var imgOffset = $(img).offset();
-        position.left = parseInt(imgOffset.left) + parseInt(area.x1);
-        position.top = parseInt(imgOffset.top) + parseInt(area.y1) + parseInt(area.height) + 5;
-
-        return position;
-    };
-
-    var _removeImgAreaSelect = function() {
+    var _removeImgAreaSelect = function () {
         $(_targetImages).imgAreaSelect({
             remove: true
         });
@@ -159,6 +171,8 @@
      * Creates an imgAreaSelect instance for adding and editing.
      *
      * @param position
+     * @param initCallback
+     * @param {jQuery=} note - The note object if editing
      * @private
      */
     var _createImgAreaSelect = function (position, initCallback, note) {
@@ -174,59 +188,50 @@
             }
         }
 
-        // Do the job!
+        // ImgAreaSelect instance
         $(_targetImages).imgAreaSelect({
-            'enable'        : true,
-            'handles'       : true,
-            'persistent'    : true,
-            'onInit'        : function (img, area) {
-                var noteFormPosition = _getNoteFormPosition(img, area);
+            enable        : true,
+            handles       : true,
+            persistent    : true,
+            imageWidth    : _imageRealWidth,
+            imageHeight   : _imageRealHeight,
+            onInit        : function (img, area) {
                 var $formDiv = $('#jphototag-note-form');
 
-                $formDiv.css({
-                    left     : noteFormPosition.left + 'px',
-                    top      : noteFormPosition.top + 'px',
-                    'z-index': 10000
-                }).show().find(':input:visible:first').focus();
-
+                // Hide all notes
                 methods.hideAll();
 
+                // Run the user-defined initCallback
                 var params = [$formDiv.find('form'), note];
                 initCallback.apply(img, params);
 
+                // Add submit and cancel callbacks
                 $formDiv
-                    .find('.jphototag-note-form-submit').click(function() {
+                    .find('.jphototag-note-form-submit').click(function () {
                         defaults.onSubmit.apply(img, params);
                     })
                     .end()
-                    .find('.jphototag-note-form-cancel').click(function() {
+                    .find('.jphototag-note-form-cancel').click(function () {
                         defaults.onCancel.apply(img, params);
                     });
 
-                $('#jphototag-note-x1').val(area.x1);
-                $('#jphototag-note-y1').val(area.y1);
-                $('#jphototag-note-height').val(area.height);
-                $('#jphototag-note-width').val(area.width);
-            },
-            'onSelectChange': function (img, area) {
-                var noteFormPosition = _getNoteFormPosition(img, area);
+                // Update the form position & values
+                _updateForm(area);
 
-                $('#jphototag-note-form').css({
-                    left: noteFormPosition.left + 'px',
-                    top : noteFormPosition.top + 'px'
-                });
+                // Display the form and focus the first visible element
+                $formDiv.css('z-index', defaults.noteFormZIndex).show().find(':input:visible:first').focus();
 
-
-                $('#jphototag-note-x1').val(area.x1);
-                $('#jphototag-note-y1').val(area.y1);
-                $('#jphototag-note-height').val(area.height);
-                $('#jphototag-note-width').val(area.width);
+//                console.log('OnInit', 'form shown');
 
             },
-            x1              : position.x1,
-            y1              : position.y1,
-            x2              : position.x2,
-            y2              : position.y2
+            onSelectChange: function (img, area) {
+                // Update the form position & values
+                _updateForm(area);
+            },
+            x1            : position.x1,
+            y1            : position.y1,
+            x2            : position.x2,
+            y2            : position.y2
         });
 
     };
@@ -244,6 +249,12 @@
         });
     };
 
+    /**
+     * Generates a unique id for new notes
+     *
+     * @returns {string}
+     * @private
+     */
     var _uniqid = function () {
         var partOne = new Date().getTime();
         var partTwo = 1 + Math.floor((Math.random() * 32767));
@@ -251,26 +262,113 @@
         return partOne + '-' + partTwo + '-' + partThree;
     };
 
+    /**
+     * Updates the positions of the notes relateive to the image
+     *
+     * @param note
+     * @private
+     */
     var _updateNotePosition = function (note) {
         var note_data = note.data('jphototag.note');
 
+        // Offset data of the image (photo)
         var imgOffset = _targetImages.offset();
 
-        var note_left = parseInt(imgOffset.left) + parseInt(note_data.x1);
-        var note_top = parseInt(imgOffset.top) + parseInt(note_data.y1);
-        var note_p_top = note_top + parseInt(note_data.height) + 5;
+        var new_note_data = _reScaleImgAreaSelectArea(note_data);
 
+        // Recalculate the positions of the note and the note description
+        var note_left = parseInt(imgOffset.left) + parseInt(new_note_data.x1);
+        var note_top = parseInt(imgOffset.top) + parseInt(new_note_data.y1);
+        var note_p_top = note_top + parseInt(new_note_data.height) + 5;
+
+//        console.log('_updateNotePosition', imgOffset, {left: note_left, top: note_top}, note_data, new_note_data, _imageScaleFactor);
+
+        // Update the note's CSS
         note.css({
-            left: note_left + 'px',
-            top    : note_top + 'px',
-            width  : note_data.width + 'px',
-            height : note_data.height + 'px'
+            left  : note_left + 'px',
+            top   : note_top + 'px',
+            width : new_note_data.width + 'px',
+            height: new_note_data.height + 'px',
+            'z-index': defaults.noteFormZIndex
         });
 
+        // Update the note text's CSS
         note.next('.jphototag-note-text').css({
             left: note_left + 'px',
-            top    : note_p_top + 'px'
+            top : note_p_top + 'px'
         });
+
+        // Update the border div's height
+        note.find('.jphototag-note-border').each(function () {
+            var $this = $(this);
+            var height = new_note_data.height - parseInt($this.css('borderTopWidth')) - parseInt($this.css('borderBottomWidth'));
+            $this.css('height', height + 'px')
+        });
+
+    };
+
+
+    /**
+     *
+     * @param area
+     * @private
+     */
+    var _updateForm = function (area) {
+        if(area.width == 0 || area.height == 0) {
+            return;
+        }
+
+        var new_area = _reScaleImgAreaSelectArea(area);
+
+        var position = {};
+        var imgOffset = $(_targetImages).offset();
+
+        position.left = parseInt(imgOffset.left) + parseInt(new_area.x1);
+        position.top = parseInt(imgOffset.top) + parseInt(new_area.y1) + parseInt(new_area.height) + 5;
+
+//        console.log('_updateForm Position', imgOffset, position, area, new_area, _imageScaleFactor);
+
+        // Update the position of the form
+        $('#jphototag-note-form').css({
+            left: position.left + 'px',
+            top : position.top + 'px'
+        });
+
+//        console.log('_updateForm Values', area, new_area);
+
+        // Update the form with the initial values
+        $('#jphototag-note-x1').val(area.x1);
+        $('#jphototag-note-y1').val(area.y1);
+        $('#jphototag-note-height').val(area.height);
+        $('#jphototag-note-width').val(area.width);
+
+    };
+
+    var _calculateImageScaleFactor = function () {
+        var displayed_width, displayed_height;
+
+        displayed_width = parseInt($(_targetImages).css('width'));
+        displayed_height = parseInt($(_targetImages).css('height'));
+
+        _imageScaleFactor = {
+            x: Math.round(displayed_width / _imageRealWidth * 1000) / 1000,
+            y: Math.round(displayed_height / _imageRealHeight * 1000) / 1000
+        };
+
+    };
+
+    var _reScaleImgAreaSelectArea = function (area) {
+        var x = Math.round(area.x1 * _imageScaleFactor.x);
+        var y = Math.round(area.y1 * _imageScaleFactor.y);
+        var width = Math.round(area.width * _imageScaleFactor.x);
+        var height = Math.round(area.height * _imageScaleFactor.y);
+
+        return {
+            x1    : x,
+            y1    : y,
+            width : width,
+            height: height
+        }
     };
 
     /**
@@ -290,81 +388,107 @@
             // Setup
             _targetImages = $(this);
 
-            // Setup show on hover.
-            if (defaults.showNotesOnHover) {
-                $(_targetImages).hover(
-                    function () {
-                        if (!_addingNote && _enabled) {
-                            $('.jphototag-note').show();
+            // Make an in-memory copy of the image to get the real dimensions of the image
+            // Run all initialization methods after the image is loaded as everything is
+            // dependant on real-image size
+            $("<img/>")
+                .attr("src", $(_targetImages).attr("src"))
+                .load(function () {
+                    _imageRealWidth = this.width;
+                    _imageRealHeight = this.height;
+
+                    // Get the scale factor
+                    _calculateImageScaleFactor();
+
+                    // Setup show on hover.
+                    if (defaults.showNotesOnHover) {
+                        $(_targetImages).hover(
+                            function () {
+                                if (!_addingNote && _enabled) {
+                                    $('.jphototag-note').show();
+                                }
+                            },
+                            function () {
+                                if (!_addingNote && _enabled) {
+                                    $('.jphototag-note,.jphototag-note-text').hide();
+                                    $('.jphototag-note').removeClass('jphototag-note-focus');
+                                }
+                            }
+                        );
+                    }
+
+                    // Add the form
+                    $('body').append(_translate(defaults.form));
+
+                    // Add the default notes
+                    if (defaults.notes.length > 0) {
+                        methods.addNotes(defaults.notes);
+                    }
+
+                    // Fix the positions of the notes if the window is resized
+                    $(window).bind('resize.jphototag', function () {
+                        // Recalculate the scale factor
+                        _calculateImageScaleFactor();
+
+                        // Update notes
+                        var notes = $(_targetImages).jPhotoTag('allNotes'), key;
+                        for (key in notes) {
+                            if (notes.hasOwnProperty(key)) {
+                                _updateNotePosition($('#jphototag-note-' + notes[key].id));
+                            }
                         }
-                    },
-                    function () {
-                        if (!_addingNote && _enabled) {
-                            $('.jphototag-note,.jphototag-note-text').hide();
-                            $('.jphototag-note').removeClass('jphototag-note-focus');
+
+                        // Update form, if we have one...
+                        var ias = $(_targetImages).data('imgAreaSelect');
+                        if(ias) {
+                            _updateForm(ias.getSelection());
                         }
-                    }
-                );
-            }
+                    });
 
-            // Add the form
-            $('body').append(_translate(defaults.form));
+                    // Add note action
+                    if (defaults.addNoteAction) {
+                        $(_targetImages).bind(defaults.addNoteAction + '.jphototag', function (e) {
 
-            // Add the default notes
-            if (defaults.notes.length > 0) {
-                methods.addNotes(defaults.notes);
-            }
+                            if (!_enabled) {
+                                return;
+                            }
 
-            // Fix the positions of the notes if the window is resized
-            $(window).bind('resize.jphototag', function() {
-                var notes = $(_targetImages).jPhotoTag('allNotes'), key;
-                for(key in notes) {
-                    if(notes.hasOwnProperty(key)) {
-                        _updateNotePosition($('#jphototag-note-' + notes[key].id));
-                    }
-                }
-            });
+                            var $img = $(this);
+                            var imgPosition = $img.offset();
 
-            // Add note action
-            if (defaults.addNoteAction) {
-                $(_targetImages).bind(defaults.addNoteAction + '.jphototag', function (e) {
+                            // Get the left and top coordinates
+                            var x1 = e.pageX - imgPosition.left - defaults.defaultSize / 2;
+                            var y1 = e.pageY - imgPosition.top - defaults.defaultSize / 2;
 
-                    if(!_enabled) {
-                        return;
-                    }
+                            // Correction for left & top. Avoid selection form moving outside the image
+                            if (x1 < 0) x1 = 0;
+                            if (y1 < 0) y1 = 0;
 
-                    var $img = $(this);
-                    var imgPosition = $img.offset();
+                            // Right and bottom coordinates
+                            var x2 = x1 + defaults.defaultSize;
+                            var y2 = y1 + defaults.defaultSize;
 
-                    // Get the left and top coordinates
-                    var x1 = e.pageX - imgPosition.left - defaults.defaultSize / 2;
-                    var y1 = e.pageY - imgPosition.top - defaults.defaultSize / 2;
+                            // Correction for right & bottom
+                            if (x2 > $img.width()) {
+                                x1 = x1 - (x2 - $img.width());
+                                x2 = x1 + defaults.defaultSize;
+                            }
 
-                    // Correction for left & top. Avoid selection form moving outside the image
-                    if (x1 < 0) x1 = 0;
-                    if (y1 < 0) y1 = 0;
+                            if (y2 > $img.height()) {
+                                y1 = y1 - (y2 - $img.height());
+                                y2 = y1 + defaults.defaultSize;
+                            }
 
-                    // Right and bottom coordinates
-                    var x2 = x1 + defaults.defaultSize;
-                    var y2 = y1 + defaults.defaultSize;
-
-                    // Correction for right & bottom
-                    if (x2 > $img.width()) {
-                        x1 = x1 - (x2 - $img.width());
-                        x2 = x1 + defaults.defaultSize;
+                            // Add the tag form
+                            methods.add({ x1: x1, y1: y1, x2: x2, y2: y2 });
+                        });
                     }
 
-                    if (y2 > $img.height()) {
-                        y1 = y1 - (y2 - $img.height());
-                        y2 = y1 + defaults.defaultSize;
-                    }
+                    _instance = this;
 
-                    // Add the tag form
-                    methods.add({ x1: x1, y1: y1, x2: x2, y2: y2 });
+                    defaults.onInit()
                 });
-            }
 
-            _instance = this;
         },
 
         /**
@@ -413,7 +537,7 @@
          */
         'remove': function (id) {
             var $note = $('#jphototag-note-' + id);
-            if(defaults.onBeforeRemove.apply(this, [$note]) !== false) {
+            if (defaults.onBeforeRemove.apply(this, [$note]) !== false) {
                 $note.next().remove();
                 $note.remove();
 
@@ -494,7 +618,7 @@
          */
         addNote: function (note_data) {
 
-            if(!note_data.id) note_data.id = _uniqid();
+            if (!note_data.id) note_data.id = _uniqid();
 
             var note_area_div = $('<div class="jphototag-note" id="jphototag-note-' + note_data.id + '"><div class="jphototag-note-border"><div class="jphototag-note-bg"></div></div></div>')
                 .data('jphototag.note', note_data);
@@ -509,7 +633,7 @@
                     }
                     $(this).addClass('jphototag-note-focus');
                     $(this).next('.jphototag-note-text').show().css('display', 'inline-block');
-                    $(this).next('.jphototag-note-text').css("z-index", 10000);
+                    $(this).next('.jphototag-note-text').css("z-index", defaults.noteFormZIndex);
                 },
                 function () {
                     if (!_addingNote) {
@@ -533,37 +657,30 @@
             _updateNotePosition(note_area_div);
 
             _notes[note_data.id] = note_data;
-
-            // Should be applied after the elements are added to the DOM or
-            // CSS properties cannot be read.
-            note_area_div.find('.jphototag-note-border').each(function() {
-                var $this = $(this);
-                var height = note_data.height - parseInt($this.css('borderTopWidth')) - parseInt($this.css('borderBottomWidth'));
-                $this.css('height', height + 'px')
-            });
         },
 
         'allNotes': function () {
             return _notes;
         },
 
-        'isEnabled': function() {
+        'isEnabled': function () {
             return _enabled;
         },
 
-        'enable': function() {
+        'enable': function () {
             _enabled = true;
         },
 
-        'disable': function() {
+        'disable': function () {
             _enabled = false;
             _removeImgAreaSelect();
             methods.hideAll();
         },
 
-        'destroy': function() {
+        'destroy': function () {
             $('#jphototag-note-form,.jphototag-note,.jphototag-note-text').remove();
             $(_targetImages).unbind('.jphototag');
+            _removeImgAreaSelect();
             _instance = null;
         }
     };
@@ -572,11 +689,11 @@
     $.fn.jPhotoTag = function (method) {
         // Method calling logic
         if (methods[method]) {
-            if(_instance) {
-                if(_enabled || method == 'enable') {
+            if (_instance) {
+                if (_enabled || method == 'enable') {
                     return methods[ method ].apply(this, Array.prototype.slice.call(arguments, 1));
                 }
-            } else if(method != 'destroy') {
+            } else if (method != 'destroy') {
                 $.error('jPhotoTag is not initialized');
             }
         } else if (typeof method === 'object' || !method) {
